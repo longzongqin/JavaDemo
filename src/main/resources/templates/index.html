@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>首页</title>
+    <header th:replace="~{./common/header.html}"></header>
+
+    <script>
+        $(function () {
+            $("#menu-index").addClass("active");
+        });
+    </script>
+</head>
+<body>
+<div class="top" th:insert="~{./common/top.html}"></div>
+<div class="left" th:insert="~{./common/left.html}"></div>
+<div class="page">
+    <div style="float: right; margin-right: 10px; margin-top: 10px;">
+        <a href="?lang=zh_CN" > 中文</a>
+        <a href="?lang=en_US" > 英语</a>
+    </div>
+    <div class="jumbotron">
+        <h1 class="display-4">Java demo</h1>
+        <p class="lead">[[#{welcome}]]</p>
+        <hr class="my-4">
+        <p>[[#{explain}]]</p>
+    </div>
+
+</div>
+
+</body>
+</html>

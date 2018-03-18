@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>用户信息</title>
+    <header th:replace="~{./common/header.html}"></header>
+
+    <script th:inline="javascript">
+        var userInfo = [[${userInfo}]];
+        var test = [[${test}]];
+        console.log(userInfo);
+        console.log(test);
+
+        $(function () {
+            $("#menu-user-info").addClass("active");
+        });
+        function updateUser(id){
+            $("#exampleModalLabel").html("修改信息");
+            $("#actionBtn").html("保存");
+            $("#input-nick").val($("#nick_"+id).html());
+            $("#input-username").val($("#username_"+id).html());
+            $("#input-password").val($("#password_"+id).html());
+            actionUser(id);
+        }
+        function addUser() {
+            $("#exampleModalLabel").html("添加用户");
+            $("#actionBtn").html("添加");
+            $("#input-nick").val("");
+            $("#input-username").val("");
+            $("#input-password").val("");
+
+            actionUser(0);
+        }
+        function actionUser(id){
+            $("#userModal").modal("show");
+            $("#actionBtn").unbind();
+            $("#actionBtn").on("click",function () {
+                var nick = $("#input-nick").val();
+                var username = $("#input-username").val();
+                var password = $("#input-password").val();
+                if(nick == "" || username == "" || password == ""){
+                    alert("昵称、账号、密码均不能为空！")
+                    return;
+                }
+                $("#userModal").modal("hide");
+                $.ajax({
+                    type: "POST",
+                    url: "/userInfo/addUser",
+                    data: {'id':id, 'nick':nick, 'username':username, 'password':password},
+                    dataType:'json',
+                    success: function(data){
+                        if(data.status == 1){
+                            location.reload();
+                        }else {
+                            alert(data.info);
+                        }
+                    }
+                });
+            });
+        }
+
+        function deleteUser(id) {
+            $("#deleteModal").modal("show");
+            $("#deleteBtn").unbind();
+            $("#deleteBtn").on("click",function () {
+                $("#deleteModal").modal("hide");
+                $.ajax({
+                    type: "POST",
+                    url: "/userInfo/deleteUser",
+                    data: {'id':id},
+                    dataType:'json',
+                    success: function(data){
+                        if(data.status == 1){
+                            location.reload();
+                        }else {
+                            alert(data.info);
+                        }
+                    }
+                });
+            });
+        }
+    </script>
+</head>
+<body>
+<div class="top" th:insert="~{./common/top.html}"></div>
+<div class="left" th:insert="~{./common/left.html}"></div>
+<div class="page">
+
+    <table class="table table-striped table-bordered table-hover">
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>昵称</th>
+            <th>账号</th>
+            <th>密码</th>
+            <th>操作</th>
+        </tr>
+        </thead>
+        <tbody>
+        <button type="button" class="btn btn-primary" onclick="addUser();" style="float: right;">添加用户</button>
+
+        <!--/*@thymesVar id="userInfo" type="com.baomidou.mybatisplus.plugins.Page<com.longzongqin.demo.entity.UserInfo>"*/-->
+        <tr th:each="user : ${userInfo.getRecords()}">
+            <td th:text="${user.id}">1</td>
+            <td th:text="${user.nick}" th:id="'nick_'+${user.id}">张三</td>
+            <td th:text="${user.username}" th:id="'username_'+${user.id}">zhangsan</td>
+            <td th:text="${user.password}" th:id="'password_'+${user.id}">zhangsan</td>
+            <td>
+                <button type="button" class="btn btn-sm btn-outline-info" th:onclick="'updateUser('+${user.id}+')'">修改</button>
+                <button type="button" class="btn btn-sm btn-outline-danger" th:onclick="'deleteUser('+${user.id}+')'">删除</button>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+</div>
+
+
+
+<div class="modal fade" id="userModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">添加用户</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="form-group">
+                        <label for="input-nick" class="col-form-label">昵称:</label>
+                        <input type="text" class="form-control" id="input-nick">
+                    </div>
+                    <div class="form-group">
+                        <label for="input-username" class="col-form-label">账号:</label>
+                        <input type="text" class="form-control" id="input-username">
+                    </div>
+                    <div class="form-group">
+                        <label for="input-password" class="col-form-label">密码:</label>
+                        <input type="text" class="form-control" id="input-password">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>
+                <button type="button" class="btn btn-primary" id="actionBtn">添加</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel1" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel1">添加用户</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+               <h5>确认删除？</h5>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>
+                <button type="button" class="btn btn-danger" id="deleteBtn">删除</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>uniview</title>
+</head>
+<body>
+    <h1 th:text="'欢迎你！' + #{welcome}"></h1>
+    <a href="?lang=en_US" > 英语</a>
+    <a href="?lang=zh_CN" > 中文</a>
+    <div th:replace="~{./common/header.html}"></div>
+    <p>--[[${name}]]--</p>
+    <img th:src="@{/static/images/test.jpg}" width="100px">
+
+    <div style="float: right;">
+        <table>
+            <tr>
+                <!--/*@thymesVar id="user" type="com.longzongqin.demo.entity.TestUser"*/-->
+                <td th:text="${user.id}"></td>
+                <td th:text="${user.nick}"></td>
+                <td th:text="${user.username}"></td>
+                <td th:text="${user.createTime}"></td>
+            </tr>
+        </table>
+        <table>
+            <!--/*@thymesVar id="user" type="com.longzongqin.demo.entity.TestUser"*/-->
+            <tr th:object="${user}">
+                <td th:text="*{id}"></td>
+                <td th:text="*{nick}"></td>
+                <td th:text="*{username}"></td>
+                <td th:text="*{createTime}"></td>
+            </tr>
+        </table>
+        <table>
+            <!--/*@thymesVar id="users" type="com.baomidou.mybatisplus.plugins.Page<com.longzongqin.demo.entity.TestUser>"*/-->
+            <tr th:each="user : ${users.getRecords()}">
+                <td th:text="${user.id}"></td>
+                <td th:text="${user.nick}"></td>
+                <td th:text="${user.username}"></td>
+                <td th:text="${user.createTime}"></td>
+            </tr>
+        </table>
+    </div>
+
+
+    <h2 th:if="${not #lists.isEmpty(#request.getParameter('error'))} " th:text="${#request.getParameter('error')}" style="color: red;"></h2>
+
+    <!--/*@thymesVar id="user" type="com.longzongqin.demo.entity.TestUser"*/-->
+    <form th:action="@{/testUser/addTestUser}" th:object="${user}" method="post">
+        <input type="text" th:field="*{username}" />
+        <input type="password" th:field="*{password}" />
+        <input type="text" th:field="*{nick}" />
+        <input type="submit" value="提交" />
+    </form>
+</body>
+</html>
