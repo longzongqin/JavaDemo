@@ -11,11 +11,11 @@ import org.springframework.stereotype.Controller;
  * </p>
  *
  * @author longzongqin
- * @since 2018-03-18
+ * @since 2018-03-19
  */
 @Controller
-@RequestMapping("/testInfo")
-public class TestInfoController {
+@RequestMapping("/logInfo")
+public class LogInfoController {
 
 }
 

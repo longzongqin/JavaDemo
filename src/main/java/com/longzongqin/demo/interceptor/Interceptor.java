@@ -1,5 +1,8 @@
 package com.longzongqin.demo.interceptor;
 
+import com.longzongqin.demo.entity.LogInfo;
+import com.longzongqin.demo.utils.LocalUtil;
+import com.longzongqin.demo.utils.SystemUtil;
 import org.springframework.lang.Nullable;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
@@ -12,13 +15,23 @@ public class Interceptor implements HandlerInterceptor{
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         System.out.println("Interceptor pre");
-        HttpSession session = request.getSession();
-//        if(session.getAttribute("userInfo") != null){
-//            return true;
-//        }
-//        response.sendRedirect(request.getContextPath()+"/login");
-//        return false;
-        System.out.println("url:"+request.getContextPath());
+
+
+        String url = request.getContextPath()+request.getRequestURI();
+        if(url.indexOf("static") == -1){
+            String ip = LocalUtil.getIPAddress(request);
+            String os = SystemUtil.getRequestSystemInfo(request);
+            String browser = SystemUtil.getRequestBrowserInfo(request);
+
+            LogInfo log = new LogInfo();
+            log.setIp(ip);
+            log.setUrl(url);
+            log.setOs(os);
+            log.setBrowser(browser);
+            log.insert();
+        }
+
+
         return true;
     }
 
