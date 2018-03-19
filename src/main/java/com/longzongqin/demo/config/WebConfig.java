@@ -1,6 +1,8 @@
 package com.longzongqin.demo.config;
 
 import com.longzongqin.demo.interceptor.Interceptor;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.converter.HttpMessageConverter;
@@ -9,6 +11,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.config.annotation.ContentNegotiationConfigurer;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
+import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.i18n.LocaleChangeInterceptor;
 import org.springframework.web.servlet.i18n.SessionLocaleResolver;
@@ -29,6 +32,9 @@ import java.util.Locale;
 @ControllerAdvice
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
+    @Value("${customer.upload-image-path}")
+    private String imagePath;
+
     @Bean
     public HttpMessageConverter<String> responseBodyConverter() {
         StringHttpMessageConverter converter = new StringHttpMessageConverter(
@@ -71,5 +77,20 @@ public class WebConfig implements WebMvcConfigurer {
         registry.addInterceptor(localeChangeInterceptor());
     }
 
-
+    @Override
+    public void addResourceHandlers(ResourceHandlerRegistry registry) {
+        if(imagePath.equals("") || imagePath.equals("${customer.upload-image-path}")){
+            String imagesPath = WebConfig.class.getClassLoader().getResource("").getPath();
+            if(imagesPath.indexOf(".jar")>0){
+                imagesPath = imagesPath.substring(0, imagesPath.indexOf(".jar"));
+            }else if(imagesPath.indexOf("classes")>0){
+                imagesPath = "file:"+imagesPath.substring(0, imagesPath.indexOf("classes"));
+            }
+            imagesPath = imagesPath.substring(0, imagesPath.lastIndexOf("/"))+"/images/";
+            imagePath = imagesPath;
+            System.out.println("-------------");
+        }
+        LoggerFactory.getLogger(WebConfig.class).info("imagesPath="+"file:"+System.getProperty("user.dir")+imagePath);
+        registry.addResourceHandler("/uploadImage/**").addResourceLocations("file:"+System.getProperty("user.dir")+imagePath);
+    }
 }

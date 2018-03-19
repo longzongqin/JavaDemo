@@ -23,7 +23,7 @@ public class AddCodeForMysql {
     public void generateCode() {
         String packageName = "com.longzongqin.demo";
         boolean serviceNameStartWithI = false;//user -> UserService, 设置成true: user -> IUserService
-        generateByTables(serviceNameStartWithI, packageName, "log_info");
+        generateByTables(serviceNameStartWithI, packageName, "img_info");
     }
 
     private void generateByTables(boolean serviceNameStartWithI, String packageName, String... tableNames) {

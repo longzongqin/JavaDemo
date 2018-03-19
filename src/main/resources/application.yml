@@ -87,4 +87,9 @@ mybatis-plus:
 #logging:
 #  level: warn
 
+customer:
+  upload-file-path: /uploadFile/
+  upload-image-path: /uploadImage/
+
+
 
