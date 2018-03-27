@@ -5,6 +5,7 @@ import com.longzongqin.demo.entity.UserInfo;
 import com.baomidou.mybatisplus.service.IService;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * <p>
@@ -18,4 +19,9 @@ public interface UserInfoService extends IService<UserInfo> {
     List<UserInfo> getAll();
 
     List<UserInfo> getUserByName(String nick);
+
+    List<UserInfo> getUserAndImg();
+    List<Map> getUserAndImg2();
+
+
 }

@@ -8,4 +8,21 @@
     <select id="getUserByName" resultType="com.longzongqin.demo.entity.UserInfo">
         SELECT * FROM user_info WHERE nick LIKE '%#{nick}%'
     </select>
+
+    <resultMap id="userImg" type="com.longzongqin.demo.entity.UserInfo">
+        <id column="id" property="id" />
+        <result column="username" property="username" />
+        <collection property="imgs" ofType="com.longzongqin.demo.entity.ImgInfo">
+            <id column="id" property="id" />
+            <result column="url" property="url"></result>
+            <result column="user_info_id" property="userInfoId"></result>
+        </collection>
+    </resultMap>
+    <select id="getUserAndImg" resultMap="userImg">
+      SELECT * FROM user_info, img_info where 1
+
+    </select>
+    <select id="getUserAndImg2" parameterType="map" resultType="java.util.Map">
+        SELECT user_info.id, username,url FROM user_info, img_info where 1
+    </select>
 </mapper>

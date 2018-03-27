@@ -9,6 +9,7 @@ import java.util.Date;
 import com.baomidou.mybatisplus.annotations.TableId;
 import com.baomidou.mybatisplus.plugins.Page;
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * <p>
@@ -30,6 +31,19 @@ public class UserInfo extends Model<UserInfo>{
     private Integer status;
     @TableField(value = "update_time",fill = FieldFill.INSERT_UPDATE)
     private String updateTime;
+
+    private List<ImgInfo> imgs;
+
+
+    public List<ImgInfo> getImgs() {
+        return imgs;
+    }
+
+    public void setImgs(List<ImgInfo> imgs) {
+        this.imgs = imgs;
+    }
+
+
 
 
     public Integer getId() {

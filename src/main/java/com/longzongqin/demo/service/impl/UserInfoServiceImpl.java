@@ -7,6 +7,7 @@ import com.baomidou.mybatisplus.service.impl.ServiceImpl;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * <p>
@@ -27,5 +28,15 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> i
     @Override
     public List<UserInfo> getUserByName(String nick) {
         return baseMapper.getUserByName(nick);
+    }
+
+    @Override
+    public List<UserInfo> getUserAndImg() {
+        return baseMapper.getUserAndImg();
+    }
+
+    @Override
+    public List<Map> getUserAndImg2() {
+        return baseMapper.getUserAndImg2();
     }
 }

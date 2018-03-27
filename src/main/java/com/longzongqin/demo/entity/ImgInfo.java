@@ -1,6 +1,7 @@
 package com.longzongqin.demo.entity;
 
 import com.baomidou.mybatisplus.activerecord.Model;
+import com.baomidou.mybatisplus.annotations.TableName;
 import com.baomidou.mybatisplus.enums.IdType;
 import java.util.Date;
 import com.baomidou.mybatisplus.annotations.TableId;
@@ -14,6 +15,7 @@ import java.io.Serializable;
  * @author longzongqin
  * @since 2018-03-19
  */
+@TableName("img_info")
 public class ImgInfo extends Model<ImgInfo> {
 
 
@@ -22,7 +24,15 @@ public class ImgInfo extends Model<ImgInfo> {
     private String url;
     private String createTime;
     private Integer status;
+    private Integer userInfoId;
 
+    public Integer getUserInfoId() {
+        return userInfoId;
+    }
+
+    public void setUserInfoId(Integer userInfoId) {
+        this.userInfoId = userInfoId;
+    }
 
     public Integer getId() {
         return id;
