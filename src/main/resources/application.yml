@@ -20,6 +20,7 @@ spring:
       enabled: true
 
 
+
   datasource:
      #oracle配置
 #     driver-class-name: oracle.jdbc.OracleDriver
@@ -27,9 +28,9 @@ spring:
 #     username: uniview
 #     password: uniview123
 
-    url: jdbc:mysql://112.124.44.80:3306/demo?characterEncoding=UTF-8
-    username: root
-    password: long@190807
+    url: jdbc:mysql://116.255.199.126:3306/javaDemo?characterEncoding=UTF-8
+    username: javaDemo
+    password: WhaWLSHAGYXxrykd
     driver-class-name: com.mysql.cj.jdbc.Driver
 
 
@@ -41,6 +42,10 @@ spring:
   #配置i18n资源文件供thymeleaf使用
   messages:
     basename: i18n/messages
+  servlet:
+    multipart:
+      max-file-size: 21504Mb
+      max-request-size: 21504Mb
 
 
 

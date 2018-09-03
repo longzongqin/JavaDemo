@@ -32,6 +32,7 @@ public class UserInfo extends Model<UserInfo>{
     @TableField(value = "update_time",fill = FieldFill.INSERT_UPDATE)
     private String updateTime;
 
+    @TableField(exist = false)
     private List<ImgInfo> imgs;
 
 

@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>大文件上传</title>
+    <header th:replace="~{./common/header.html}"></header>
+    <link href="/static/webuploader/webuploader.css" rel="stylesheet" />
+    <script src="/static/webuploader/webuploader.min.js"></script>
+    <script src="/static/js/md5.js" rel="stylesheet"></script>
+
+    <style>
+        .file-item{
+            background: gainsboro;
+        }
+        .file-item > div{
+            background: green;
+            height: 10px;
+        }
+    </style>
+
+
+</head>
+<body>
+<div class="top" th:insert="~{./common/top.html}"></div>
+<div class="left" th:insert="~{./common/left.html}"></div>
+<div class="page">
+    <div style="width: 100%; border: 1px solid gainsboro;overflow: hidden; padding: 20px;">
+        <button type="button" class="btn btn-primary" id="filePicker">添加文件</button>
+        <button type="button" class="btn btn-success" onclick="upload()">开始上传</button>
+        <button type="button" class="btn btn-warning" onclick="pause()">暂停上传</button>
+    </div>
+
+
+
+    <br>
+    <div id="fileList" style="width: 100%; border: 1px solid gainsboro;overflow: hidden; padding: 20px;">
+        <div class="file-item">
+            <span>test</span>
+            <div style="width: 20%;"></div>
+        </div>
+    </div>
+
+</div>
+
+
+
+<div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel1" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel1">添加用户</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+               <h5>确认删除？</h5>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>
+                <button type="button" class="btn btn-danger" id="deleteBtn">删除</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script th:inline="javascript">
+    var uploadsMd5 = {};
+    //监听分块上传过程中的时间点
+    WebUploader.Uploader.register({
+        "before-send-file":"beforeSendFile",  // 整个文件上传前
+        "before-send":"beforeSend",  // 每个分片上传前
+        "after-send-file": "afterSendFile"  // 分片上传完毕
+    },{
+        //时间点1：所有分块进行上传之前调用此函数 ，检查文件存不存在
+        beforeSendFile:function(file){
+            console.log("beforeSendFile");
+            var deferred = WebUploader.Deferred();
+            $.ajax({
+                type:"POST",
+                url:"/uploader/checkFile",
+                data:{
+                    md5File: uploadsMd5[file.id], //文件唯一标记
+                },
+                async: false,  // 同步
+                dataType:"json",
+                success:function(response){
+                    if(response){  //文件存在，跳过 ，提示文件存在
+                        alert("文件已存在");
+                        console.log("文件已存在");
+                    }else{
+                        deferred.resolve();  //文件不存在或不完整，发送该文件
+                    }
+                }
+            } , function (jqXHR, textStatus, errorThrown) { //任何形式的验证失败，都触发重新上传
+                deferred.resolve();
+            } );
+            return deferred.promise();
+        },
+        //时间点2：如果有分块上传，则每个分块上传之前调用此函数  ，判断分块存不存在
+        beforeSend:function(block){
+            console.log(block);
+            console.log(uploadsMd5[block.file.id]);
+            console.log("beforeSend");
+            var deferred = WebUploader.Deferred();
+            $.ajax({
+                type:"POST",
+                url:"/uploader/checkChunk",
+                data:{
+                    md5File: uploadsMd5[block.file.id],  //文件唯一标记
+                    chunk:block.chunk,  //当前分块下标
+                },
+                dataType:"json",
+                success:function(response){
+                    if(response){
+                        deferred.reject(); //分片存在，跳过
+                    }else{
+                        deferred.resolve();  //分块不存在或不完整，重新发送该分块内容
+                    }
+                }
+            }, function (jqXHR, textStatus, errorThrown) { //任何形式的验证失败，都触发重新上传
+                deferred.resolve();
+            });
+            return deferred.promise();
+        },
+        //时间点3：分片上传完成后，通知后台合成分片
+        afterSendFile: function (file) {
+            console.log("afterSendFile");
+            var chunksTotal = Math.ceil(file.size / (5*1024*1024));
+//            if (chunksTotal > 1) {
+                //合并请求
+                var deferred = WebUploader.Deferred();
+                $.ajax({
+                    type: "POST",
+                    url: "/uploader/merge",
+                    data: {
+                        name: file.name,
+                        md5File: uploadsMd5[file.id],
+                        chunks: chunksTotal
+                    },
+                    cache: false,
+                    async: false,  // 同步
+                    dataType: "json",
+                    success:function(response){
+                        console.log("afterSendFile:"+response);
+                        if(response){
+                            $('#file-' + file.id + " > span").html(file.name+"-上传成功");
+                            $( '#file-'+file.id+" > div").css("width","100%");
+                            //手动更新状态
+                            file.setStatus("complete");
+                            //检查重置
+                            checkUploadOver();
+                        }else{
+                            $('#file-' + file.id + " > span").html(file.name+"-上传失败");
+                            deferred.reject();
+                        }
+                    }
+                })
+                return deferred.promise();
+//            }
+        }
+    });
+
+
+    /**
+     * 检查重置
+     */
+    function checkUploadOver() {
+        var stats = uploader.getStats();
+        if(stats.progressNum == 0){
+            uploader.reset();
+        }
+    }
+
+    var uploader = WebUploader.create({
+        auto: false,// 选完文件后，是否自动上传。
+        swf: '/static/webuploader/Uploader.swf',// swf文件路径
+        server: '/uploader/upload',// 文件接收服务端。
+        pick: '#filePicker',// 选择文件的按钮。可选。
+        chunked:true,//开启分片上传
+        chunkSize:5*1024*1024,//5M
+        chunkRetry: 3,//错误重试次数
+        threads: 50 //此参数在本页面中决定了一次选的文件能上传多少
+    });
+
+
+
+    //上传添加参数
+    uploader.on('uploadBeforeSend', function (obj, data, headers) {
+        data.md5File=uploadsMd5[data.id];
+    });
+    //当文件被加入队列之前触发，此事件的handler返回值为false，则此文件不会被添加进入队列
+    uploader.on('beforeFileQueued', function (file) {
+        var files = uploader.getFiles();
+        for (var i = 0; i < files.length; i++){
+            if(files[i].name == file.name && files[i].size == file.size){
+                alert("文件已存在");
+                return false;
+            }
+        }
+        console.log(file);
+        var fileMd5 = hex_md5(file.name+file.size);//根据文件名称，大小确定文件唯一标记，这种方式不赞成使用
+        uploadsMd5[file.id] = fileMd5;
+    });
+
+    // 当有文件被添加进队列的时候
+    uploader.on( 'fileQueued', function( file ) {
+        var html = ' <div class="file-item" id="file-'+file.id+'">\n' +
+            '            <span>'+file.name+'</span>\n' +
+            '            <div style="width: 0%;"></div>\n' +
+            '        </div>';
+        $("#fileList").append(html);
+    });
+
+    // 文件上传过程中创建进度条实时显示。
+    uploader.on( 'uploadProgress', function( file, percentage ) {
+        $( '#file-'+file.id+" > div").css("width",(percentage*100)+"%");
+    });
+
+    uploader.on( 'uploadSuccess', function( file , response ) {
+        console.log("上传成功----------------");
+        console.log(file);
+        console.log(response);
+        console.log("上传成功----------------");
+    });
+    uploader.on( 'uploadComplete', function( file ) {
+        console.log(file.name+"-上传完成");
+    });
+    uploader.on( 'uploadError', function( file ,reason) {
+        console.log("上传失败---------------");
+        console.log(file);
+        console.log(reason);
+        console.log("上传失败---------------");
+        uploader.retry();
+    });
+
+    function upload() {
+        uploader.upload();
+    }
+    function pause() {
+        uploader.stop(true);
+    }
+</script>
+
+</body>
+</html>

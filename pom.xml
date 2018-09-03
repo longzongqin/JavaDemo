@@ -6,7 +6,7 @@
 	<groupId>com.longzongqin</groupId>
 	<artifactId>JavaDemo</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<packaging>jar</packaging>
+	<packaging>war</packaging>
 
 	<name>JavaDemo</name>
 	<description>JavaDemo project for Spring Boot</description>
